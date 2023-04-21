@@ -1,6 +1,8 @@
+from pydantic import BaseModel
 from tusk.places.snow.models import CamelCaseModel
 from enum import IntFlag, auto
 
+class PowerCard(BaseModel):
 class Element(IntFlag):
     FIRE = auto()
     SNOW = auto()
