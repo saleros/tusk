@@ -1,3 +1,4 @@
 # tusk
 
-Work in progress.
+Our "fixed" version of Tusk a Card Jitsu Snow game server. 
+##### Work in progress.
