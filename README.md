@@ -1,5 +1,5 @@
 <p align="center">
-## **Tusk**
+Tusk
 </p>
 Tusk is a Card Jitsu Snow open source game server that is currently being worked on for wand and Houdini
 
