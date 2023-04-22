@@ -25,7 +25,7 @@ world_name_service = APIRouter(
 @world_name_service.get('/start_world_request')
 async def start_world(name: str, owner: str, worlds_created: int = Depends(get_world_created)):
     world = app.places.get(name)
-    world_destination = await app.redis.get(f'{owner}.mp.world') or b'0:10001' # 0:0 is lobby in this case.
+    world_destination = await app.redis.get(f'{owner}.mp.world') or b'0:0' # 0:0 is lobby in this case.
 
     if world is None:
         if worlds_created > 0: # each user can only create one world/server to prevent ddosing, atleast i hope it would stop them.
