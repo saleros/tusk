@@ -4,7 +4,7 @@ Tusk
 Tusk is a Card Jitsu Snow open source game server that is currently being worked on for wand and Houdini
 
 ## Features
-- Handlers to make Card Jitsu Snow function (Still being worked on currently!)
+- Handlers to make Card Jitsu Snow function (Still currently being worked on!)
 
 ## Installation
 ##### Work in progress.
