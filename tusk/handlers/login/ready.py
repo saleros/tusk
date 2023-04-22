@@ -4,12 +4,12 @@ from tusk.places import get_inputs, get_object, get_preload_objects
 @slash_command('ready')
 @authenticated
 async def server_ready(p):
-    inputs = get_inputs(p.place.name)
+    
+    place_class = p.server.place.cls
+    inputs = get_inputs(p.server.place.name)
     for ipt in inputs.values():
         await p.send_tag('W_INPUT', ipt.input_id, ipt.script_id, int(ipt.target), int(ipt.modifier), ipt.command, '')
-    await p.send_tag('W_PLACE', p.place.place_id, p.place.object_id, p.place.instance_id)
-
-    place_class = p.place.cls
+    await p.send_tag('W_PLACE', p.server.place.place_id, p.server.place.object_id, p.server.place.instance_id)
 
     await p.send_tag('P_MAPBLOCK', 't', 1, 1, place_class.PlaceSettings.MapBlocks.tile)
     await p.send_tag('P_MAPBLOCK', 'h', 1, 1, place_class.PlaceSettings.MapBlocks.height)
@@ -51,7 +51,7 @@ async def server_ready(p):
                         place_class.UISettings.BackgroundSprite.scale_y
                     )
     for i, obj_id in enumerate(place_class.PlaceSettings.tile_list):
-        tile = get_object(p.place.name, obj_id)
+        tile = get_object(p.server.place.name, obj_id)
         await p.send_tag('P_TILE', i, tile.url, int(tile.blocking), int(tile.blend), 1, '0:1', 
                          int(tile.tile_mode), int(tile.friction), int(tile.bounce), tile.art_index)
     physics_settings = place_class.PlaceSettings.Physics
@@ -66,5 +66,5 @@ async def server_ready(p):
                         int(physics_settings.net_bounce)
                     )
     await p.send_tag('P_ASSETSCOMPLETE', 0, 0)
-    for obj in get_preload_objects(p.place.name):
+    for obj in get_preload_objects(p.server.place.name):
         await p.send_tag('S_LOADSPRITE', obj.art_index)

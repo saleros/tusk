@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from tusk.places.objects import Sprite
+from tusk.places.objects import Sprite, Template
 from typing import Any, Callable, Dict
 import weakref
 
@@ -7,25 +7,30 @@ import weakref
 class Object:
     manager: Any
     id: int
-    art: str = '0:1'
+    art: Sprite = Sprite
     x: int = 0
     y: int = 0
     z: int = 0
     name: str = ''
-    template: str = '0:1'
-    block: bool = False
+    template: Template = Template
+    terrain: bool = True
     pickable: bool = False
     scale_by_depth: bool = False
     callbacks: Dict = field(default_factory=dict)
 
+
+    @property
+    def coords(self):
+        return self.x + self.template.x_offset, self.y + self.template.y_offset
+
     async def init(self):
-        await self.manager.penguin.send_tag('O_HERE', self.id, self.art, 
-                                            self.x, self.y, self.z, int(not self.z),
-                                            0, 0, 0, self.name, self.template, int(self.block), int(self.pickable), int(self.scale_by_depth))
+        await self.manager.penguin.send_tag('O_HERE', self.id, self.art.art_index, 
+                                            *self.coords, self.z, int(not self.z),
+                                            0, 0, 0, self.name, self.template, int(self.pickable), int(self.terrain), int(self.scale_by_depth))
 
     async def move(self, x, y, z=0):
         self.x, self.y, self.z = x, y, z
-        await self.manager.penguin.send_tag('O_MOVE', self.id, x, y, z)
+        await self.manager.penguin.send_tag('O_MOVE', self.id, *self.coords, z)
 
     async def animate(self, sprite: Sprite, play_style='play_once', time_scale: int = 1, no_reset: bool = False, callback: Callable = None):
         handle_id = self.manager.handle_id
@@ -44,7 +49,15 @@ class Object:
         await self.manager.penguin.send_tag('O_PLAYER', self.id)
 
     async def delete(self):
+        self.remove_input_handler()
         await self.manager.penguin.send_tag('O_GONE', self.id)
+
+    def set_input_handler(self, callback):
+        self.callbacks['input'] = callback
+    
+    def remove_input_handler(self):
+        if 'input' in self.callbacks:
+            del self.callbacks['input']
 
 class ObjectManager:
 
@@ -68,12 +81,14 @@ class ObjectManager:
     def get_object(self, obj_id):
         return self.objects.get(obj_id)
 
-    async def create_object(self, art: str = '0:1', x: int = 0, y: int = 0 , z: int = 0, 
-                            name: str = '', template: str = '0:1', block: bool = False, pickable: bool = False,
+    async def create_object(self, art: Sprite = Sprite, x: int = 0, y: int = 0 , z: int = 0, 
+                            name: str = '', template: Template = Template, terrain: bool = True, pickable: bool = False,
                             scale_by_depth: bool = False
                             ):
         obj_id = self.game_object_id
-        obj = self.objects[obj_id] = Object(self.ref, obj_id, art, x, y, z, name, template, block, pickable, scale_by_depth)
+        obj = self.objects[obj_id] = Object(self.ref, obj_id, art, x, y, z, name, template, terrain, pickable, scale_by_depth)
         await obj.init()
         return obj
 
+    async def copy_object(self, object):
+        return await self.create_object(object.art, object.x, object.y, object.z, object.name, object.template, object.block, object.pickable, object.scale_by_depth)

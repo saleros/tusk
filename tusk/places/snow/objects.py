@@ -1,5 +1,5 @@
 from . import PlaceObject, PlacePreloadObject
-from tusk.places.objects import Tile, Sprite
+from tusk.places.objects import Tile, Sprite, Template
 
 
 @PlaceObject
@@ -192,6 +192,7 @@ class ScrapDaze(Sprite):
 class TankDaze(Sprite):
     art_index: str = "0:1840010"
 
-@PlaceObject
-class TankDaze(Sprite):
-    art_index: str = "0:1840010"
+class MoveTileTemplate(Template):
+    art_index: str = '0:30020'
+    x_offset: float = 0.5
+    y_offset: float = 0.9998

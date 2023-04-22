@@ -35,7 +35,7 @@ class WindowManager:
         self.penguin = p
         self.object_id = 101 + int(p.crossworld_ui)
         self.command = 'soleroTuskFramework'
-        p.user_events[self.command] = [WindowCommandObj(command=None, callback=authenticated(self.received_from_framework))] #FIXME: not the best idea but works.
+        self.penguin.add_event(self.command, self.received_from_framework)
 
     async def load(self):
         await self.penguin.send_tag('UI_CROSSWORLDSWFREF', self.object_id, 0, 'WindowManagerSwf', 

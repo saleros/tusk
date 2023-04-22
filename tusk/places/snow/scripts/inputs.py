@@ -12,5 +12,6 @@ from tusk.places.constants import MouseTarget, InputModifier, InputEvent
     command = "use"
 ))
 async def game_object_selected(p, object_id, x, y, obj_x, obj_y):
-    # TO DO: Handle Game Object Clicking
-    pass
+    object_id = int(object_id)
+    object = p.objects.get_object(object_id)
+    await object.callbacks['input'](p, object)

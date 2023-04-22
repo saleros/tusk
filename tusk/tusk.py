@@ -4,6 +4,7 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
+from tusk.places import get_place
 from tusk.handlers import server_handlers, get_package_modules
 from tusk.client import MetaplaceServerProtocol
 from tusk.api.app import app
@@ -22,13 +23,14 @@ except ImportError:
 
 class Tusk:
 
-    def __init__(self, id, owner, name):
+    def __init__(self, id, owner, name, place):
         self.server = None
         self.server_coroutine = None
         
         self.id = id
         self.owner = owner
         self.name = name
+        self.place = get_place(place)
         self.redis = app.redis
         self.penguins_by_id = {}
 

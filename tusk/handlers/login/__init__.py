@@ -45,15 +45,7 @@ async def force_login(p):
     await success_login(p)
 
 async def success_login(p):
-
-    world = await app.redis.get(f'{p.user.id}.mp.world')
-    await app.redis.delete(f'{p.user.id}.mp.world')
-
-    world = world.decode()
-    p.place = get_place(world)
     await p.send_tag('S_LOGINDEBUG', 'Finalizing login, creating final user object')
-    
-
     await p.send_tag('S_WORLDTYPE', 0, 1, 0)
     await p.send_tag('S_WORLD', p.server.id, p.server.name, '0:0', 0, 'none', 0, p.server.owner, p.server.name, 0, p.server.stylesheet_id, 0)
     await p.send_tag('S_LOGIN', p.user.id)

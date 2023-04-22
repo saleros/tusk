@@ -1,21 +1,30 @@
 from tusk.managers.object import ObjectManager
-from tusk.handlers import slash_command_handlers, server_handlers
+from tusk.handlers import slash_command_handlers, server_handlers, authenticated
 from tusk.places import inputs
+
+from dataclasses import dataclass
+from typing import Callable
 
 import re
 import weakref
 import asyncio
+
+
+@dataclass  
+class UserEvent:
+    callback: Callable
+
 class MetaplaceServerProtocol(asyncio.Protocol):
 
     
     def __init__(self, server):
         super().__init__()
         self.server = server
+        self.place = server.place
         self.data = b''  # Keep track of received data
         self.user_events = {}
         self.crossworld_ui = False
         self.window_manager = None
-        self.place = None
         self.user = None
         self.element = None
         self.context = {}
@@ -83,6 +92,7 @@ class MetaplaceServerProtocol(asyncio.Protocol):
             self.place = None
             self.window_manager = None
             self.server = None
+            self.user_events = {}
     
     async def send_tag(self, tag, *data):
         data = '|'.join(map(str, data))
@@ -92,6 +102,12 @@ class MetaplaceServerProtocol(asyncio.Protocol):
         if not self.transport.is_closing():
             self.server.logger.debug(f'Outgoing data: {data}')
             self.transport.write((data + delimiter).encode())
+
+    def add_event(self, cmd, callback, require_auth=True):
+        if require_auth:
+            callback = authenticated(callback)
+        self.user_events[cmd] = self.user_events.get(cmd, [])
+        self.user_events[cmd].append(UserEvent(callback))
 
     def close(self):
         # Clear buffer

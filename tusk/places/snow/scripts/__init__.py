@@ -33,14 +33,17 @@ class CJSMatchMaking:
             await self.send_players_to_battle(players)
 
     async def send_players_to_battle(self, players):
+        match_id = players[0].user.id
         for player in players:
             await player.window_manager.send_action(CloseWindowAction(
                 target_window = player.get_url(SNOW_PLAYER_SELECT)
             ))
             async with player.server.redis.pipeline(transaction=True) as pipe:
-                await (pipe.set(f'{player.user.id}.element', int(player.element))
-                            .set(f'{player.user.id}.mp.world', '0:10001').execute()) # 0:10001 is the snow battle world id.
-            await player.send_tag('S_GOTO', f'cjsnow_{players[0].user.id}', 'snow_lobby', '', urlencode(player.context)) # send to the battling server.
+                query = pipe.set(f'{player.user.id}.element', int(player.element))\
+                            .set(f'{player.user.id}.match', match_id)\
+                            .set(f'{player.user.id}.mp.world', '0:10001').execute() # 0:10001 is the snow battle world id.
+                await query
+            await player.send_tag('S_GOTO', f'cjsnow_{match_id}', 'snow_lobby', '', urlencode(player.context)) # send to the battling server.
 
     async def remove_from_queue(self, player):
         if player.element is None:

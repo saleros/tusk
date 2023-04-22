@@ -5,9 +5,12 @@ from .constants import TileModes
 
 class Template:
     art_index: str = "0:1"
+    x_offset: float = 0
+    y_offset: float = 0
 
 class Sprite:
-    art_index: str = "-1:-1"
+    art_index: str = "0:1"
+    duration: int = 0
 
 class Tile(Sprite):
     url: str = ''
