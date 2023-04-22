@@ -18,6 +18,10 @@ class Object:
     scale_by_depth: bool = False
     callbacks: Dict = field(default_factory=dict)
 
+    def get_nearby_tiles(self, max_x, max_y, range_limit=1):
+        return ((i, j-1) for i in range(max(self.x-range_limit, 0), min(self.x+1+range_limit, max_x+1)) 
+                for j in range(max(self.y-range_limit, 0), min(self.y+1+range_limit, max_y+1)) 
+                if abs(self.x-i) + abs(self.y-j) <= range_limit)
 
     @property
     def coords(self):

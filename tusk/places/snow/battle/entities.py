@@ -1,8 +1,28 @@
-from tusk.places.snow.objects import *
+from abc import ABC, abstractmethod, abstractproperty
 
-class Entity:
-    # TODO: do entities
-    pass
+class Entity(ABC):
 
-class FireNinja(Entity):
-    pass
+    @property
+    @abstractmethod
+    def idle_animation(self):
+        """This animation will play on default"""
+
+    @property
+    @abstractmethod
+    def move_animation(self):
+        """This animation will play when the entity moves"""
+
+    @property
+    @abstractmethod     
+    def hit_animation(self):
+        """This animation will play if the entity gets hit"""
+
+    @property
+    @abstractmethod
+    def knockout_intro_anim(self):
+        """This animation will play before (knockout_anim) if it exists"""
+
+    @property
+    @abstractmethod
+    def knockout_anim(self):
+       """This animation loops when the entity dies"""

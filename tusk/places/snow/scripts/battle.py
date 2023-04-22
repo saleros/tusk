@@ -21,6 +21,12 @@ async def place_ready(p):
 async def handle_room_loaded(p, **_):
     await p.server.battle_manager.join(p)
 
+@window_event("roomToRoomComplete")
+@OnPlaceId('0:10001')
+@authenticated
+async def handle_room_loaded(p, **_):
+    await p.server.battle_manager.join(p)
+
 @server_command('boot')
 @OnPlaceId('0:10001')
 async def setup_battle(server):
