@@ -5,8 +5,8 @@ from .constants import TileModes
 
 class Template:
     art_index: str = "0:1"
-    x_offset: float = 0
-    y_offset: float = 0
+    x_offset: float = 0.5
+    y_offset: float = 1
 
 class Sprite:
     art_index: str = "0:1"

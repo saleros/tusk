@@ -192,10 +192,20 @@ class ScrapDaze(Sprite):
 class TankDaze(Sprite):
     art_index: str = "0:1840010"
 
+@PlaceObject
+@PlacePreloadObject #I purposedly put this into preload so when the game loads the health bar is already loaded.
+class RegularHealthBar(Sprite):
+    art_index: str = "0:100395"
+
 class MoveTileTemplate(Template):
     art_index: str = '0:30020'
     x_offset: float = 0.5
-    y_offset: float = 0.
+    y_offset: float = 0.9998
+
+class HealthBarTemplate(Template):
+    art_index: str = '0:30040'
+    x_offset: float = 0.5
+    y_offset: float = 1.0004
     
 class RockTileTemplate(Template):
     art_index: str = '0:100145'

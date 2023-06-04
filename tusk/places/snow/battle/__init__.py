@@ -10,6 +10,7 @@ from .ninjas import ninjas
 from ..constants import BOARD_HEIGHT, BOARD_WIDTH, ROCKS_SPAWN_POINT
 import random
 import asyncio
+import weakref
 
 @dataclass
 class SharedObject:
@@ -36,6 +37,11 @@ class SharedObject:
     def get_penguin_obj(self, penguin_id):
         return self.penguin_objects.get(penguin_id)
 
+    async def move(self, x, y, z=0):
+        self.x, self.y, self.z = x, y, z
+        for game_object in self.penguin_objects.values():
+            await game_object.move(x, y, z)
+
     def __getattr__(self, instance):
         async def handler(*args, **kwargs):
             for game_object in self.penguin_objects.values():
@@ -59,6 +65,7 @@ class BattleManager:
         self.water_ninja = None
         self.snow_ninja = None
         self.environment = random.choice([CragValley, Forest, MountainTop])
+        self.ref = weakref.proxy(self)
     
     async def init(self):
         self.fire_ninja = await self.create_object(x=4.5, y=2.5)
@@ -76,8 +83,8 @@ class BattleManager:
         await self.snow_ninja.move(*spawns.pop())
 
 
-        _background = await self.create_object(x=4.48869, y=-1.11106, art=self.environment.Background)
-        _foreground = await self.create_object(x=4.5, y=6.1, art=self.environment.Foreground)
+        _background = await self.create_object(x=3.98869, y=-2.11106, art=self.environment.Background)
+        _foreground = await self.create_object(x=4, y=5.1, art=self.environment.Foreground)
         for x in range(BOARD_WIDTH):
             self.board[x] = {}
             for y in range(BOARD_HEIGHT):
@@ -92,7 +99,7 @@ class BattleManager:
             await rock.update_sprite(self.environment.Rock)
 
         for ninja in self.ninjas:
-            await ninja.object.update_sprite(ninja.idle_anim)
+            await ninja.load(self.ref)
 
         await self.send_action(CloseCjsnowRoomToRoomAction())
         

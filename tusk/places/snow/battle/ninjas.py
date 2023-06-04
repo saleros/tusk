@@ -11,11 +11,14 @@ def Ninja(element):
         return cls
     return decorate
 
+
 class BaseNinja(Entity):
 
     def __init__(self, penguin, object):
         self.penguin = penguin
-        self.object = object
+        self._object = object
+
+    health_bar = RegularHealthBar
 
     @property
     @abstractmethod
@@ -45,6 +48,7 @@ class BaseNinja(Entity):
 
 @Ninja(Element.FIRE)
 class FireNinja(BaseNinja):
+    max_health = 30
     idle_anim = FireNinjaIdleAnim
     move_anim = FireNinjaMoveAnim
     hit_anim = FireNinjaHitAnim
@@ -58,6 +62,7 @@ class FireNinja(BaseNinja):
 
 @Ninja(Element.SNOW)
 class SnowNinja(BaseNinja):
+    max_health = 28
     idle_anim = FireNinjaIdleAnim
     move_anim = FireNinjaMoveAnim
     hit_anim = FireNinjaHitAnim
@@ -71,6 +76,7 @@ class SnowNinja(BaseNinja):
 
 @Ninja(Element.WATER)
 class WaterNinja(BaseNinja):
+    max_health = 38
     idle_anim = FireNinjaIdleAnim
     move_anim = FireNinjaMoveAnim
     hit_anim = FireNinjaHitAnim
