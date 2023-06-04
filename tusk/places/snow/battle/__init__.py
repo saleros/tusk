@@ -1,17 +1,30 @@
 from tusk.places.snow.models.card import Element
-from tusk.places.snow.objects import MoveTileTemplate
+from tusk.places.snow.objects import RockTileTemplate, MoveTileTemplate, Template
+from tusk.places.snow.models.window import CloseCjsnowRoomToRoomAction
 from tusk.managers.object import Object
 from dataclasses import dataclass, field
 from tusk.client import MetaplaceServerProtocol
-
+from typing import Dict
 from .environments import *
-from ..constants import BOARD_HEIGHT, BOARD_WIDTH
+from .ninjas import ninjas
+from ..constants import BOARD_HEIGHT, BOARD_WIDTH, ROCKS_SPAWN_POINT
 import random
 import asyncio
 
 @dataclass
-class SharedObject(Object):
-    penguin_objects: dict = field(default_factory=dict)
+class SharedObject:
+    id: int
+    art: Sprite = Sprite
+    x: int = 0
+    y: int = 0
+    z: int = 0
+    name: str = ''
+    template: Template = Template
+    terrain: bool = True
+    pickable: bool = False
+    scale_by_depth: bool = False
+    callbacks: Dict = field(default_factory=dict)
+    penguin_objects: Dict = field(default_factory=dict)
 
     def add_penguin_obj(self, penguin_id, obj):
         self.penguin_objects[penguin_id] = obj
@@ -19,6 +32,9 @@ class SharedObject(Object):
     def remove_penguin_obj(self, penguin_id):
         if penguin_id in self.penguin_objects:
             del self.penguin_objects[penguin_id]
+
+    def get_penguin_obj(self, penguin_id):
+        return self.penguin_objects.get(penguin_id)
 
     def __getattr__(self, instance):
         async def handler(*args, **kwargs):
@@ -35,27 +51,56 @@ class BattleManager:
     def __init__(self, server):
         self.object_id = 0
         self.objects = {}
+        self.obstacles = {}
         self.board = {}
+        self.ninjas = []
         self.server = server
         self.fire_ninja = None
         self.water_ninja = None
         self.snow_ninja = None
         self.environment = random.choice([CragValley, Forest, MountainTop])
-
-        loop = asyncio.get_running_loop()
-        self.timeout = loop.call_at(30, lambda: asyncio.ensure_future(self.start))
     
     async def init(self):
-        loop = asyncio.get_running_loop()
-        loop.call_at(16, lambda: asyncio.ensure_future(self.start))
+        self.fire_ninja = await self.create_object(x=4.5, y=2.5)
+        self.water_ninja = await self.create_object(x=4.5, y=2.5)
+        self.snow_ninja = await self.create_object(x=4.5, y=2.5)
 
     async def start(self):
         # TODO: Check if the game autostarted; if it is autostarted, remove any unused penguins! if it exists.
-        for y in range(BOARD_HEIGHT):
-            self.board[y] = {}
-            for x in range(BOARD_WIDTH):
-                tile = self.board[x] = await self.create_object(x=x, y=y, template=MoveTileTemplate)
-                tile.set_input_handler(self.tile_pressed)
+
+        # This sets the spawn position of the ninjas:
+        spawns = self.environment.PENGUIN_SPAWNS.copy()
+        random.shuffle(spawns)
+        await self.fire_ninja.move(*spawns.pop())
+        await self.water_ninja.move(*spawns.pop())
+        await self.snow_ninja.move(*spawns.pop())
+
+
+        _background = await self.create_object(x=4.48869, y=-1.11106, art=self.environment.Background)
+        _foreground = await self.create_object(x=4.5, y=6.1, art=self.environment.Foreground)
+        for x in range(BOARD_WIDTH):
+            self.board[x] = {}
+            for y in range(BOARD_HEIGHT):
+                tile = self.board[x][y] = await self.create_object(x=x, y=y, template=MoveTileTemplate)
+                await tile.set_input_handler(self.tile_pressed)
+
+        for x, y in ROCKS_SPAWN_POINT:
+            self.obstacles[x] = self.obstacles.get(x, {})
+            # We currently store the Obstacle into an object for future usages. 
+            # will be used when writing the CPU players for snow minions.
+            rock = self.obstacles[x][y] = await self.create_object(x=x, y=y, template=RockTileTemplate) 
+            await rock.update_sprite(self.environment.Rock)
+
+        for ninja in self.ninjas:
+            await ninja.object.update_sprite(ninja.idle_anim)
+
+        await self.send_action(CloseCjsnowRoomToRoomAction())
+        
+    async def send_action(self, action):
+        aws = []
+        for ninja in self.ninjas:
+            aws.append(ninja.penguin.window_manager.send_action(action))
+        await asyncio.gather(*aws)
 
     async def tile_pressed(self, p, tile):
         # a tip to anyones reading this and want a quick implementation
@@ -67,26 +112,44 @@ class BattleManager:
         #  before adding another one.
         pass # TODO: Tile press handling.
 
+    def get_ninja_by_element(self, element):
+        if element == Element.FIRE:
+            return self.fire_ninja
+        elif element == Element.WATER:
+            return self.water_ninja
+        elif element == Element.SNOW:
+            return self.snow_ninja
+        #TODO: sensei (This is the last thing we do so we do not worry about this yet)
+
+    def get_ninja_by_penguin(self, p):
+        for ninja in self.ninjas:
+            if ninja.penguin == p:
+                return ninja
+
     async def join(self, p):
+        if self.get_ninja_by_penguin(p) is not None:
+            return self.get_ninja_by_penguin(p).object.get_penguin_obj(p.user.id)
 
-        if p in self.ninjas:
-            return
+        #init ninja object
+        element = await p.server.redis.hget(p.server.name, p.user.id)
+        element = int(element)
+        ninja_obj = ninjas.get(element)
+        self.ninjas.append(ninja_obj(p, self.get_ninja_by_element(element)))
 
-        element = await p.server.redis.get(f'{p.user.id}.element')
-        self.ninjas.append(p)
         # sync objects
         for obj in self.objects.values():
             player_obj = await p.objects.copy_object(obj)
             obj.add_penguin_obj(p.user.id, player_obj)
         
-        if len(self.ninjas) > 3:
+        if len(self.ninjas) >= 3:
             await self.start()
+        return self.get_ninja_by_penguin(p).object.get_penguin_obj(p.user.id)
 
         
     async def create_object(self, *args, **kwargs):
         self.object_id += 1
-        object = SharedObject(None, self.object_id, *args, **kwargs)
+        self.objects[self.object_id] = object = SharedObject(self.object_id, *args, **kwargs)
         for ninja in self.ninjas:
-            player_obj = await ninja.objects.copy_object(object)
-            object.add_penguin_obj(ninja.user.id, player_obj)
+            player_obj = await ninja.penguin.objects.copy_object(object)
+            object.add_penguin_obj(ninja.penguin.user.id, player_obj)
         return object

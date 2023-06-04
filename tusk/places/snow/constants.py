@@ -11,3 +11,5 @@ WINDOW_MANAGER_URL = SWF_PATH + '/windowManager/windowmanager.swf'
 # Board Constants
 BOARD_WIDTH = 9
 BOARD_HEIGHT = 5
+
+ROCKS_SPAWN_POINT = [(2, 0), (6, 0), (2, 4), (6, 4)]

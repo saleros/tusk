@@ -195,4 +195,55 @@ class TankDaze(Sprite):
 class MoveTileTemplate(Template):
     art_index: str = '0:30020'
     x_offset: float = 0.5
-    y_offset: float = 0.9998
+    y_offset: float = 0.
+    
+class RockTileTemplate(Template):
+    art_index: str = '0:100145'
+    x_offset: float = 0.5
+    y_offset: float = 1
+
+#Fire ninja animations
+
+class FireNinjaIdleAnim(Sprite):
+    art_index: str = "0:100340"
+    duration: int = 800
+
+class FireNinjaMoveAnim(Sprite):
+    art_index: str = "0:100341"
+    duration: int = 600
+
+class FireNinjaHitAnim(Sprite):
+    art_index: str = "0:100342"
+    duration: int = 1200
+
+class FireNinjaAttackAnim(Sprite):
+    art_index: str = "0:100343"
+    duration: int = 2100
+
+class FireNinjaPowerBottleAnim(Sprite):
+    art_index: str = "0:100344"
+    duration: int = 1500
+
+class FireNinjaPowerBottleAnim(Sprite):
+    art_index: str = "0:100345"
+    duration: int = 1782
+
+class FireNinjaPowerBottleAnim(Sprite):
+    art_index: str = "0:100345"
+    duration: int = 1782
+
+class FireNinjaCelebrateStartAnim(Sprite):
+    art_index: str = "0:100354"
+    duration: int = 0
+
+class FireNinjaCelebrateLoopAnim(Sprite):
+    art_index: str = "0:100355"
+    duration: int = 0
+
+class FireNinjaKnockoutStartAnim(Sprite):
+    art_index: str = "0:100356"
+    duration: int = 0
+
+class FireNinjaKnockoutStartAnim(Sprite):
+    art_index: str = "0:100357"
+    duration: int = 0

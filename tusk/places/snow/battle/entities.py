@@ -4,17 +4,17 @@ class Entity(ABC):
 
     @property
     @abstractmethod
-    def idle_animation(self):
+    def idle_anim(self):
         """This animation will play on default"""
 
     @property
     @abstractmethod
-    def move_animation(self):
+    def move_anim(self):
         """This animation will play when the entity moves"""
 
     @property
     @abstractmethod     
-    def hit_animation(self):
+    def hit_anim(self):
         """This animation will play if the entity gets hit"""
 
     @property

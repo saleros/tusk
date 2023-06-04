@@ -39,8 +39,7 @@ class CJSMatchMaking:
                 target_window = player.get_url(SNOW_PLAYER_SELECT)
             ))
             async with player.server.redis.pipeline(transaction=True) as pipe:
-                query = pipe.set(f'{player.user.id}.element', int(player.element))\
-                            .set(f'{player.user.id}.match', match_id)\
+                query = pipe.hset(f'cjsnow_{match_id}', player.user.id, int(player.element))\
                             .set(f'{player.user.id}.mp.world', '0:10001').execute() # 0:10001 is the snow battle world id.
                 await query
             await player.send_tag('S_GOTO', f'cjsnow_{match_id}', 'snow_lobby', '', urlencode(player.context)) # send to the battling server.

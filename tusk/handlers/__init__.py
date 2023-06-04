@@ -45,20 +45,20 @@ def slash_command(cmd, place=None):
     return decorate
     
 def authenticated(fn):
-    async def handle(p, *args):
+    async def handle(p, *args, **kwargs):
         if not p.user:
             return p.close()
-        return await fn(p, *args)
+        return await fn(p, *args, **kwargs)
     return handle
 
 
 def server_command(evt):
     def decorate(fn):
-        async def callback(*args):
+        async def callback(*args, **kwargs):
             if inspect.iscoroutinefunction(fn):
-                await fn(*args)
+                await fn(*args, **kwargs)
             else:
-                fn(*args)
+                fn(*args, **kwargs)
         server_handlers[evt] = server_handlers.get(evt, [])
         server_handlers[evt].insert(0, callback)
         return fn

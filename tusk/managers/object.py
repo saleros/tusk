@@ -30,7 +30,7 @@ class Object:
     async def init(self):
         await self.manager.penguin.send_tag('O_HERE', self.id, self.art.art_index, 
                                             *self.coords, self.z, int(not self.z),
-                                            0, 0, 0, self.name, self.template, int(self.pickable), int(self.terrain), int(self.scale_by_depth))
+                                            0, 0, 0, self.name, self.template.art_index, int(self.pickable), int(self.terrain), int(self.scale_by_depth))
 
     async def move(self, x, y, z=0):
         self.x, self.y, self.z = x, y, z
@@ -95,4 +95,4 @@ class ObjectManager:
         return obj
 
     async def copy_object(self, object):
-        return await self.create_object(object.art, object.x, object.y, object.z, object.name, object.template, object.block, object.pickable, object.scale_by_depth)
+        return await self.create_object(object.art, object.x, object.y, object.z, object.name, object.template, object.terrain, object.pickable, object.scale_by_depth)

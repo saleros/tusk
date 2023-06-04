@@ -8,7 +8,8 @@ from typing import Callable
 import re
 import weakref
 import asyncio
-
+import traceback
+import sys
 
 @dataclass  
 class UserEvent:
@@ -73,9 +74,8 @@ class MetaplaceServerProtocol(asyncio.Protocol):
             try:
                 await handler.callback(self.ref, *packet_split[1:])
             except Exception as e:
-                print(e)
-                # TODO: error handling
-                pass
+                self.server.logger.error(f'Error while processing {message}: \n {traceback.print_exception(*sys.exc_info())}')
+                # TODO: proper error handling
 
     def connection_lost(self, exc):
 

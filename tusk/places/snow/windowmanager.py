@@ -60,6 +60,5 @@ class WindowManager:
             try:
                 await handler.callback(p, **data)
             except Exception as e:
-                print(e)
                 #TODO: PROPER ERROR HANDLING
                 pass
