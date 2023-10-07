@@ -8,6 +8,9 @@ Tusk is a Card Jitsu Snow open source game server that is currently being worked
 
 ## Installation
 ##### Work in progress.
+
+docker buildx build -t tusk .
+
 ***NOTE**: Houdini and Dash needs to be installed, functions with vanilla-media (AS3) only, for more information on how to install it please visit https://github.com/solero/wand*
 
 ## Game Screenshots
